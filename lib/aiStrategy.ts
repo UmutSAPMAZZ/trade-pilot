@@ -1,61 +1,35 @@
-import talib from 'talib-binding';
-import { BinanceService } from './binanceService';
+import { RSI, MACD, SMA } from 'technicalindicators';
 
-interface StrategyResult {
-  action: 'BUY' | 'SELL' | 'HOLD';
-  confidence: number;
-  indicators: {
-    rsi?: number;
-    macd?: number;
-    ema?: number;
-  };
-}
+export class ModernAIStrategy {
+  async analyze(symbol: string, closes: number[]): Promise<TradingSignal> {
+    // 1. Göstergeleri hesapla
+    const rsiResults = RSI.calculate({ values: closes, period: 14 });
+    const macdResults = MACD.calculate({
+      values: closes,
+      fastPeriod: 12,
+      slowPeriod: 26,
+      signalPeriod: 9
+    });
+    
+    const currentRsi = rsiResults[rsiResults.length - 1];
+    const currentMacd = macdResults[macdResults.length - 1];
 
-export class AIStrategy {
-  private binance: BinanceService;
-
-  constructor(binanceService: BinanceService) {
-    this.binance = binanceService;
-  }
-
-  async analyze(symbol: string, timeframe = '1h'): Promise<StrategyResult> {
-    // 1. Piyasa verilerini al
-    const ohlcv = await this.binance.fetchOHLCV(symbol, timeframe);
+    // 2. AI Karar Mekanizması
+    const confidence = this.calculateConfidence(currentRsi, currentMacd.histogram);
     
-    // 2. Teknik göstergeleri hesapla
-    const closes = ohlcv.map(candle => candle[4]); // Kapanış fiyatları
-    
-    // RSI hesapla
-    const rsi = talib.RSI(closes, 14);
-    const currentRsi = rsi[rsi.length - 1];
-    
-    // MACD hesapla
-    const macdResult = talib.MACD(closes, 12, 26, 9);
-    const macd = macdResult.macdHistogram[macdResult.macdHistogram.length - 1];
-    
-    // 3. Karar verme mantığı
-    if (currentRsi < 30 && macd > 0) {
-      return {
-        action: 'BUY',
-        confidence: 0.85,
-        indicators: { rsi: currentRsi, macd }
-      };
-    } else if (currentRsi > 70 && macd < 0) {
-      return {
-        action: 'SELL',
-        confidence: 0.8,
-        indicators: { rsi: currentRsi, macd }
-      };
+    if (currentRsi < 30 && currentMacd.histogram > 0) {
+      return { action: 'BUY', confidence };
+    } else if (currentRsi > 70 && currentMacd.histogram < 0) {
+      return { action: 'SELL', confidence };
     }
     
-    return {
-      action: 'HOLD',
-      confidence: 0.65,
-      indicators: { rsi: currentRsi, macd }
-    };
+    return { action: 'HOLD', confidence: 0.5 };
   }
 
-  async executeTrade(symbol: string, amount: number, action: 'BUY' | 'SELL') {
-    return this.binance.createOrder(symbol, 'market', action, amount);
+  private calculateConfidence(rsi: number, macdHist: number): number {
+    // Basit bir confidence hesaplama algoritması
+    const rsiConfidence = Math.abs(50 - rsi) / 50; // 0-1 arası
+    const macdConfidence = Math.min(Math.abs(macdHist) * 10, 1); 
+    return (rsiConfidence * 0.6 + macdConfidence * 0.4);
   }
 }
