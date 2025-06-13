@@ -2,14 +2,40 @@ import { NextResponse } from 'next/server';
 import ccxt from 'ccxt';
 
 export async function POST(req: Request) {
-  const { apiKey, secret, symbol } = await req.json();
+  const { apiKey, secret } = await req.json();
   
   try {
-    const exchange = new ccxt.binance({ apiKey, secret });
+    // Tip güvenliği için bu şekilde kullanın
+    const exchange = new (ccxt as any).binance({
+      apiKey,
+      secret,
+      enableRateLimit: true,
+      options: {
+        defaultType: 'spot',
+        test: true // Testnet için
+      },
+      urls: {
+        api: {
+          public: 'https://testnet.binance.vision/api/v3',
+          private: 'https://testnet.binance.vision/api/v3'
+        }
+      }
+    });
+
     const balance = await exchange.fetchBalance();
     
-    return NextResponse.json({ balance });
-  } catch (error) {
-    return NextResponse.json({ error: 'API Hatası' }, { status: 500 });
+    return NextResponse.json({ 
+      success: true,
+      balance 
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      { 
+        success: false,
+        error: error.message || 'Binance API Error',
+        details: error instanceof Error ? error.stack : undefined
+      },
+      { status: 500 }
+    );
   }
 }

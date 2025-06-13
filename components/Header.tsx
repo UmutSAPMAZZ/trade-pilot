@@ -1,4 +1,3 @@
-import AuthButton from '@/components/AuthButton';
 import NotificationCenter from '@/components/NotificationCenter';
 import Link from 'next/link';
 
@@ -15,22 +14,22 @@ export default function Header() {
           <nav className="hidden md:block ml-10">
             <ul className="flex space-x-6">
               <li>
-                <Link href="/dashboard" className="hover:text-white transition-colors">
+                <Link href={"/dashboard"} className="hover:text-white transition-colors">
                   Gösterge Paneli
                 </Link>
               </li>
               <li>
-                <Link href="/trading" className="hover:text-white transition-colors">
+                <Link href={"/trading"} className="hover:text-white transition-colors">
                   Ticaret
                 </Link>
               </li>
               <li>
-                <Link href="/portfolio" className="hover:text-white transition-colors">
+                <Link href={"/portfolio"} className="hover:text-white transition-colors">
                   Portföy
                 </Link>
               </li>
               <li>
-                <Link href="/strategies" className="hover:text-white transition-colors">
+                <Link href={"/strategies"} className="hover:text-white transition-colors">
                   Stratejiler
                 </Link>
               </li>
@@ -40,7 +39,11 @@ export default function Header() {
         
         <div className="flex items-center space-x-4">
           <NotificationCenter />
-          <AuthButton />
+          <Link href="/login" className="text-slate-200 hover:text-white transition-colors">
+            <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
+              <span className="text-lg font-bold">P</span>
+            </div>
+          </Link>
         </div>
       </div>
     </header>

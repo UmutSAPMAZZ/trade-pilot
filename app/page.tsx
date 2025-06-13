@@ -1,3 +1,4 @@
+'use client';
 import RealTimeChart from '@/components/RealTimeChart';
 import ApiKeyManager from '@/app/components/ApiKeyManager';
 import TradingCard from '@/app/components/TradingCard';
@@ -11,11 +12,6 @@ export default function Home() {
             <div className="bg-blue-600 w-10 h-10 rounded-lg"></div>
             <h1 className="text-2xl font-bold">TradePilot</h1>
           </div>
-          <nav>
-            <button className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg">
-              Giriş Yap
-            </button>
-          </nav>
         </div>
       </header>
 

@@ -1,28 +1,28 @@
 import ccxt from 'ccxt';
 
-interface BinanceConfig {
-  apiKey: string;
-  secret: string;
-  testnet?: boolean;
-}
-
 export class BinanceService {
-  private exchange: ccxt.binance;
+  private exchange: any; // Tip sorunlarını aşmak için any kullanıyoruz
 
-  constructor(config: BinanceConfig) {
-    this.exchange = new ccxt.binance({
+  constructor(config: {
+    apiKey: string;
+    secret: string;
+    testnet?: boolean;
+  }) {
+    // Dinamik olarak binance exchange'i oluşturuyoruz
+    const ExchangeClass = (ccxt as any)['binance'];
+    this.exchange = new ExchangeClass({
       apiKey: config.apiKey,
       secret: config.secret,
       enableRateLimit: true,
       options: {
         defaultType: 'spot',
-        test: config.testnet || true,
+        ...(config.testnet ? { test: true } : {})
       },
       ...(config.testnet ? {
         urls: {
           api: {
             public: 'https://testnet.binance.vision/api/v3',
-            private: 'https://testnet.binance.vision/api/v3',
+            private: 'https://testnet.binance.vision/api/v3'
           }
         }
       } : {})

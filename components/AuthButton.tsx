@@ -1,29 +1,19 @@
-'use client';
-import { signIn, signOut, useSession } from "next-auth/react";
+"use client";
+import { signIn } from "next-auth/react";
 
-export default function AuthButton() {
-  const { data: session } = useSession();
+type Provider = "google" | "github";
 
-  if (session) {
-    return (
-      <div className="flex items-center space-x-4">
-        <span className="hidden sm:inline">Hoş geldin, {session.user?.name}</span>
-        <button 
-          onClick={() => signOut()}
-          className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg"
-        >
-          Çıkış Yap
-        </button>
-      </div>
-    );
-  }
-  
+export default function AuthButton({ provider }: { provider: Provider }) {
+  const handleLogin = () => signIn(provider, { callbackUrl: "/dashboard" });
+
   return (
-    <button 
-      onClick={() => signIn('google')}
-      className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg"
+    <button
+      onClick={handleLogin}
+      className={`px-4 py-2 rounded-md text-white ${
+        provider === "google" ? "bg-red-600" : "bg-gray-800"
+      }`}
     >
-      Google ile Giriş Yap
+      {provider === "google" ? "Google ile Giriş" : "GitHub ile Giriş"}
     </button>
   );
 }
