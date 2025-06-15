@@ -11,10 +11,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url))
   }
 
-  // Giriş yapmamış kullanıcıyı korumalı sayfalardan yönlendir
-  if (!token && pathname.startsWith('/dashboard')) {
-    return NextResponse.redirect(new URL('/login', request.url))
-  }
+  // // Giriş yapmamış kullanıcıyı korumalı sayfalardan yönlendir
+  // if (!token && pathname.startsWith('/dashboard')) {
+  //   return NextResponse.redirect(new URL('/login', request.url))
+  // }
 
   return NextResponse.next()
 }
